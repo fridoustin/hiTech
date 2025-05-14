@@ -7,6 +7,9 @@ import androidx.compose.animation.core.animateValue
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import com.example.hitech.features.home.components.RecommendationItem
+import com.example.hitech.features.home.components.SearchBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -59,11 +62,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
 import com.example.hitech.R
+import com.example.hitech.features.home.components.CloudDecoration
+import com.example.hitech.features.home.components.DestinationCarousel
+import com.example.hitech.features.home.data.Carousel
+import com.example.hitech.features.home.data.Recommendation
 
 @Composable
 fun HomePage() {
@@ -86,75 +94,6 @@ fun HomePage() {
         ) { paddingValues ->
             HomeContent(paddingValues)
         }
-
-        // Cloud decorations - these would be replaced with actual cloud images in a real app
-        CloudDecoration(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 60.dp, start = 20.dp)
-        )
-    }
-}
-
-@Composable
-fun CloudDecoration(modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition(label = "cloudMove")
-    val offsetX by infiniteTransition.animateValue(
-        initialValue = 0.dp,
-        targetValue = 12.dp,
-        typeConverter = Dp.VectorConverter,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "cloudOffset"
-    )
-
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        Cloud(
-            modifier = Modifier
-                .offset(x = offsetX, y = 12.dp)
-                .align(Alignment.TopStart)
-        )
-        Cloud(
-            modifier = Modifier
-                .offset(x = -offsetX, y = 64.dp)
-                .align(Alignment.TopEnd)
-        )
-    }
-}
-
-@Composable
-fun Cloud(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .size(100.dp)
-            .graphicsLayer {
-                alpha = 0.5f // efek transparan
-            }
-    ) {
-        // Lingkaran utama
-        Box(
-            modifier = Modifier
-                .size(60.dp)
-                .background(Color.White, shape = CircleShape)
-                .align(Alignment.CenterStart)
-        )
-        // Lingkaran tambahan
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .background(Color.White, shape = CircleShape)
-                .align(Alignment.TopCenter)
-        )
-        Box(
-            modifier = Modifier
-                .size(45.dp)
-                .background(Color.White, shape = CircleShape)
-                .align(Alignment.CenterEnd)
-        )
     }
 }
 
@@ -167,13 +106,68 @@ private fun HomeContent(paddingValues: PaddingValues) {
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        HeaderSection()
-        SearchBarSection()
-        ActivityCategoriesSection()
-        RecommendedSection()
+        Box(){
+            CloudDecoration(
+                modifier = Modifier
+                    .padding(top = 40.dp, start = 20.dp)
+                    .fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            HeaderSection()
 
-        // Add extra padding at the bottom
+        }
+        val destinations = listOf(
+            Carousel("Tongkonan","Kete Kesu, Tana Toraja", "Wisata", R.drawable.tongkonan),
+            Carousel("Tongkonan","Kete Kesu, Tana Toraja", "Wisata", R.drawable.tongkonan),
+            Carousel("Tongkonan","Kete Kesu, Tana Toraja", "Wisata", R.drawable.tongkonan),
+            Carousel("Tongkonan","Kete Kesu, Tana Toraja", "Wisata", R.drawable.tongkonan)
+        )
+        val recommendations = listOf(
+            Recommendation("Kete Kesu", "Tana Toraja", R.drawable.tongkonan),
+            Recommendation("Kete Kesu", "Tana Toraja", R.drawable.tongkonan),
+        )
+
+        SearchBar()
+        Spacer(modifier = Modifier.padding(top = 8.dp))
+        DestinationCarousel(destinations = destinations)
+        ActivityCategoriesSection()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Recommended",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = Color.Black
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("See all", color = Color.Black)
+                Icon(
+                    Icons.Default.KeyboardArrowRight,
+                    contentDescription = "See all",
+                    tint = Color.Black
+                )
+            }
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            recommendations.forEach { recommendation ->
+                RecommendationItem(
+                    recommendation,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
@@ -197,7 +191,7 @@ private fun HeaderSection() {
         Spacer(modifier = Modifier.padding(4.dp))
 
         Text(
-            text = "Ready to begin your next adventure?",
+            text = "Ready to explore South Sulawesi?",
             color = Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
@@ -205,36 +199,6 @@ private fun HeaderSection() {
         )
 
         Spacer(modifier = Modifier.padding(16.dp))
-    }
-}
-
-
-@Composable
-private fun SearchBarSection() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Search,
-                contentDescription = "Search",
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = "Search your place",
-                color = Color.Gray,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(start = 12.dp)
-            )
-        }
     }
 }
 
@@ -257,12 +221,11 @@ private fun ActivityCategoriesSection() {
         ActivityCategory("Running", Color(0xFFE9967A)),
         ActivityCategory("Jumping", Color(0xFF99CC66))
     )
-
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(21.dp),
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
-    ) {
-        items(categories) { category ->
+    ){
+        categories.forEach{ category ->
             ActivityCategoryItem(category)
         }
     }
@@ -285,258 +248,12 @@ private fun ActivityCategoryItem(category: ActivityCategory) {
             // This would be replaced with an actual image
             // For example: Image(painter = ..., contentDescription = category.name)
         }
-
         Text(
             text = category.name,
             fontSize = 12.sp,
             modifier = Modifier.padding(top = 8.dp),
             color = Color.Black
         )
-    }
-}
-
-@Composable
-private fun RecommendedSection() {
-    // Section header with "See all" button
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 24.dp, bottom = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Recommended",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = Color.Black
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("See all", color = Color.Black)
-            Icon(
-                Icons.Default.KeyboardArrowRight,
-                contentDescription = "See all",
-                tint = Color.Black
-            )
-        }
-    }
-
-    // List of recommended activities
-    val recommendations = listOf(
-        Recommendation("Hill Climbing", "San Francisco"),
-        Recommendation("Hill Climbing", "San Francisco")
-    )
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        recommendations.forEach { recommendation ->
-            RecommendationItem(
-                recommendation,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun RecommendationItem(recommendation: Recommendation, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.height(180.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Image area (60% of card height)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.6f)
-                    .background(Color(0xFFE0F7FA))
-            ) {
-                // This would be replaced with an actual image in a real app
-                // Image(
-                //     painter = painterResource(id = R.drawable.hill_climbing),
-                //     contentDescription = recommendation.activityName,
-                //     contentScale = ContentScale.Crop,
-                //     modifier = Modifier.fillMaxSize()
-                // )
-
-                // Favorite button
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.8f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Favorite,
-                        contentDescription = "Favorite",
-                        tint = Color(0xFFFF6B6B),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-
-            // Info area (40% of card height)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.4f)
-                    .padding(12.dp)
-            ) {
-                Text(
-                    text = recommendation.activityName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    Icon(
-                        Icons.Default.LocationOn,
-                        contentDescription = "Location",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                        text = recommendation.location,
-                        fontSize = 12.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(start = 2.dp)
-                    )
-                }
-
-                // Travelled icons - these would be replaced with actual icons/images
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text(
-                        text = "Travelled",
-                        fontSize = 12.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(end = 4.dp)
-                    )
-
-                    // User icons
-                    Row {
-                        for (i in 0..2) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .padding(end = if (i < 2) 4.dp else 0.dp)
-                                    .clip(CircleShape)
-                                    .background(when (i) {
-                                        0 -> Color(0xFF64B5F6)
-                                        1 -> Color(0xFFFFB74D)
-                                        else -> Color(0xFF81C784)
-                                    })
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Bottom Navigation Bar Component
-@Composable
-fun BottomNavBar() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Home - Selected
-            BottomNavItemComponent(
-                icon = Icons.Default.Home,
-                title = "Home",
-                isSelected = true
-            )
-
-            // Map/Search
-            BottomNavItemComponent(
-                icon = Icons.Default.Search,
-                title = "Search",
-                isSelected = false
-            )
-
-            // Profile
-            BottomNavItemComponent(
-                icon = Icons.Default.Person,
-                title = "Profile",
-                isSelected = false
-            )
-
-            // Bookmarks
-            BottomNavItemComponent(
-                icon = Icons.Default.Settings,
-                title = "Saved",
-                isSelected = false
-            )
-        }
-    }
-}
-
-@Composable
-private fun BottomNavItemComponent(icon: ImageVector, title: String, isSelected: Boolean) {
-    val background = if (isSelected) Color(0xFF1976D2) else Color.Transparent
-    val contentColor = if (isSelected) Color.White else Color.Gray
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .then(
-                if (isSelected) {
-                    Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(background)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                } else {
-                    Modifier
-                }
-            )
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                tint = contentColor,
-                modifier = Modifier.size(24.dp)
-            )
-
-            if (isSelected) {
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = title,
-                    color = contentColor,
-                    fontSize = 14.sp
-                )
-            }
-        }
     }
 }
 
@@ -646,7 +363,7 @@ fun BottomBarItem(
                     .width(24.dp)
                     .height(3.dp)
                     .clip(RoundedCornerShape(1.5.dp))
-                    .background(Color(0xFF8BC34A))
+                    .background(Color(0xFF87CEEB))
                     .padding(bottom = 8.dp)
             )
         } else {
@@ -683,9 +400,4 @@ fun BottomBarItem(
 data class ActivityCategory(
     val name: String,
     val backgroundColor: Color
-)
-
-data class Recommendation(
-    val activityName: String,
-    val location: String
 )
